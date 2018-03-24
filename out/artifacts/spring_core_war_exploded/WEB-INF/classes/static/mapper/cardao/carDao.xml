@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--@author dhcc[manjusakachn@gmail.com]，version v1.0-->
+<!--mapper 用户数据获取 start -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.dhcc.car.dao.cardao.CarDao">
+    <!--第三方缓存技术 ehcache-->
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+    <!--查询车辆状态-->
+    <select id="getCarDao">
+        SELECT CAR_NO FROM t_car where CAR_NO=1;
+    </select>
+    <resultMap id="car_info" type="com.dhcc.car.model.car.Car">
+        <id column="ID" property="id"/>
+        <result column="CAR_NO" property="carNo"/>
+        <result column="CAR_PNO" property="carPno"/>
+        <result column="CAR_PDATE" property="carPdate"/>
+        <result column="STATE" property="status"/>
+        <result column="CUSTATE" property="cuStatus"/>
+        <result column="REMARK" property="cRemark"/>
+        <result column="IS_VALID" property="isNo"/>
+        <result column="USER_NAME" property="userName"/>
+        <result column="B_TIME" property="bTime"/>
+        <result column="R_TIME" property="rTime"/>
+        <result column="curk" property="cuRemark"/>
+    </resultMap>
+    <!--查询车辆信息-->
+    <select id="findCarDao" parameterType="com.dhcc.car.model.param.ParamDTO" resultMap="car_info">
+        select * from t_car a left join (select CAR_ID, USER_NAME,STATE CUSTATE,B_TIME,R_TIME,remark curk from
+        t_car_useinfo) b ON
+        a.ID=b.CAR_ID
+        <where>
+            <if test="status !=null and status !=''">
+                a.STATE=#{status}
+            </if>
+            <if test="carid !=null and carid!=''">
+                a.CAR_NO=#{carid}
+            </if>
+            <if test="isNo !=null and isNo!=''">
+                a.IS_VALID=#{isNo}
+            </if>
+            <if test="uName !=null and uName!=''">
+                b.USER_NAME=#{uName}
+            </if>
+        </where>
+        ORDER BY a.ID DESC
+    </select>
+    <!--查询车辆使用信息-->
+    <select id="findCarUseInfoDao" parameterType="com.dhcc.car.model.param.ParamDTO"
+            resultType="com.dhcc.car.model.car.CarUserInfo">
+        SELECT ID,CAR_ID,USER_NAME,B_TIME,R_TIME,STATE,remark FROM t_car_useinfo
+        <where>
+            <if test="status !=null and status !=''">
+                STATE=#{status}
+            </if>
+            <if test="carid !=null and carid!=''">
+                CAR_NO=#{carid}
+            </if>
+            <if test="uName !=null and uName!=''">
+                USER_NAME=#{uName}
+            </if>
+        </where>
+        ORDER BY ID DESC
+    </select>
+    <!--新增车辆信息sql-->
+    <insert id="addCarDao" parameterType="com.dhcc.car.model.car.Car">
+        INSERT INTO t_car(CAR_NO,CAR_PNO,CAR_PDATE,STATE,REMARK,IS_VALID)
+        VALUES (#{carNo},#{carPno},#{carPdate},#{status},#{cRemark}, #{isNo})
+    </insert>
+    <!--新增车辆使用信息sql-->
+    <select id="addCarUseInfoDao" parameterType="string">
+    INSERT INTO t_car_useinfo(CAR_ID,USER_NAME,B_TIME,STATE,remark) VALUES (#{id},#{uName},#{rTime},#{status},#{remark})
+    </select>
+    <!--删除车辆信息sql-->
+    <update id="deleteCarDao" parameterType="string">
+        UPDATE t_car SET IS_VALID = 1 WHERE ID = #{id} AND IS_VALID=0 AND STATE=1
+    </update>
+    <!--修改（借出/归还）车辆信息sql-->
+    <update id="updateCarDao" parameterType="string">
+    UPDATE t_car SET STATE = #{status}, REMARK = #{remark} WHERE ID = #{id} AND STATE=#{state} AND IS_VALID =0
+    </update>
+    <update id="updateCarUseInfoDao" parameterType="string">
+    UPDATE t_car_useinfo SET STATE = #{status},R_TIME=#{rTime}, remark = #{remark} WHERE CAR_ID = #{id} AND STATE=1
+    </update>
+
+    <!--新增车辆使用sql-->
+</mapper>
+        <!--mapper 用户数据获取 end -->

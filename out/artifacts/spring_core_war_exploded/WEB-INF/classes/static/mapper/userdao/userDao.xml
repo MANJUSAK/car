@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--@author dhcc[manjusakachn@gmail.com]，version v1.0-->
+<!--mapper 用户数据获取 start -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.dhcc.car.dao.userdao.UserDao">
+    <!--第三方缓存技术 ehcache-->
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+    <!-- 用户数据字段共用sql -->
+    <sql id="user_dao">ID,USER_NAME,USER_PASSWORD,GENDER,ADDRESS,AGE,USER_NO</sql>
+    <!-- 用户数据映射 -->
+    <resultMap id="userInfo" type="com.dhcc.car.model.user.User">
+        <id column="ID" property="id"/>
+        <result column="USER_NO" property="userNo"/>
+        <result column="USER_NAME" property="name"/>
+        <result column="USER_PASSWORD" property="password"/>
+        <result column="AGE" property="age"/>
+        <result column="GENDER" property="gender"/>
+        <result column="ADDRESS" property="address"/>
+    </resultMap>
+    <!-- 用户数据保存sql -->
+    <select id="userLoginDao" parameterType="string" resultMap="userInfo">
+        SELECT
+        <include refid="user_dao"/>
+        FROM t_user WHERE USER_NAME=#{uName} AND USER_PASSWORD=#{pwd}
+    </select>
+    <!--检查用户名是否重复sql-->
+    <select id="checkUnameDao" parameterType="string" resultType="string">
+        SELECT USER_NAME FROM t_user where USER_NAME=#{uName}
+    </select>
+    <!-- 用户数据保存sql -->
+    <insert id="userRegisterDao" parameterType="com.dhcc.car.model.user.User">
+        INSERT INTO t_user(<include refid="user_dao"/>) VALUES
+        (#{id},#{name},#{password},#{gender},#{address},#{age},#{userNo})
+    </insert>
+</mapper>
+        <!--mapper 用户数据获取 end -->
